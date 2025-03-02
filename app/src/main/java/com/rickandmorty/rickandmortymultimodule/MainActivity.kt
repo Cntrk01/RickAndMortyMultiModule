@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rickandmorty.network.Character
 import com.rickandmorty.network.KtorClient
-import com.rickandmorty.network.TestFunction
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,7 +38,7 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
 
             LaunchedEffect (Unit){
-                character = ktorClient.getCharacters(1)
+                //character = ktorClient.getCharacters(1)
             }
 
             RickAndMortyMultiModuleTheme {
@@ -51,7 +50,6 @@ class MainActivity : ComponentActivity() {
                     Column (
                         modifier = Modifier.padding(innerPadding)
                     ){
-                        TestFunction()
                         Text(text = character?.name ?: "No Character")
                     }
                 }
