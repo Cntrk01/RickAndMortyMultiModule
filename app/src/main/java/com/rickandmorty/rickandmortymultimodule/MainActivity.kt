@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.rickandmorty.network.Character
 import com.rickandmorty.network.KtorClient
+import com.rickandmorty.rickandmortymultimodule.component.CharacterDetailsScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 
 class MainActivity : ComponentActivity() {
@@ -50,7 +51,16 @@ class MainActivity : ComponentActivity() {
                     Column (
                         modifier = Modifier.padding(innerPadding)
                     ){
-                        Text(text = character?.name ?: "No Character")
+                        CharacterDetailsScreen(
+                            ktorClient = ktorClient,
+                            onEpisodeClicked = {
+
+                            },
+                            onBackClicked = {
+
+                            },
+                            characterId = 25,
+                        )
                     }
                 }
             }
