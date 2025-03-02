@@ -1,5 +1,8 @@
 package com.rickandmorty.network
 
+import com.rickandmorty.network.models.domain.Character
+import com.rickandmorty.network.models.remote.RemoteCharacter
+import com.rickandmorty.network.models.remote.toDomainCharacter
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -31,7 +34,10 @@ class KtorClient {
     }
     //client.get("character/$id"): GET isteği yapar
     //.body<Character>(): Yanıtı Character veri modeline dönüştürür.
-    suspend fun getCharacters(id : Int) : Character = client.get("character/$id").body()
+    suspend fun getCharacters(id : Int) : Character = client
+        .get("character/$id")
+        .body<RemoteCharacter>()
+        .toDomainCharacter()
 }
 
 @Serializable
