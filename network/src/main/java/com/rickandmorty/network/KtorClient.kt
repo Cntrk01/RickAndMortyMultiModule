@@ -15,6 +15,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.lang.Exception
 
 class KtorClient {
     private val client = HttpClient(OkHttp){
@@ -34,20 +35,35 @@ class KtorClient {
     }
     //client.get("character/$id"): GET isteği yapar
     //.body<Character>(): Yanıtı Character veri modeline dönüştürür.
-    suspend fun getCharacters(id : Int) : Character = client
-        .get("character/$id")
-        .body<RemoteCharacter>()
-        .toDomainCharacter()
+    suspend fun getCharacters(id : Int) : ApiOperation<Character> =
+        safeApiCall {
+            client
+                .get("character/$id")
+                .body<RemoteCharacter>()
+                .toDomainCharacter()
+    }
+
+    private inline fun <T>safeApiCall(apiCall : ()->T) : ApiOperation<T>{
+        return try {
+            ApiOperation.Success(data = apiCall())
+        }catch (e : Exception){
+            ApiOperation.Failure(exception = e)
+        }
+    }
 }
 
-@Serializable
-data class Character(
-    val id : Int,
-    val name : String,
-    val origin : Origin,
-){
-    @Serializable
-    data class Origin(
-        val name : String,
-    )
+sealed interface ApiOperation<T>{
+    data class Success<T>(val data : T) : ApiOperation<T>
+    data class Failure<T>(val exception: Exception) : ApiOperation<T>
+
+    fun onSuccess(callback : (T) -> Unit) : ApiOperation<T> {
+        if (this is Success) callback(data)
+        return this
+    }
+
+    fun onFailure(callback : (Exception) -> Unit) : ApiOperation<T> {
+        if (this is Failure) callback(exception)
+        return this
+    }
+
 }

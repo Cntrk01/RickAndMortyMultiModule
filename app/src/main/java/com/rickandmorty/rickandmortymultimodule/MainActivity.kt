@@ -18,8 +18,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.rickandmorty.network.Character
 import com.rickandmorty.network.KtorClient
+import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.rickandmortymultimodule.component.CharacterDetailsScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 

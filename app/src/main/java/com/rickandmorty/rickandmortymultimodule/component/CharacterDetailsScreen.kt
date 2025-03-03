@@ -67,7 +67,14 @@ fun CharacterDetailsScreen(
 
     LaunchedEffect (Unit){
         delay(500)
-        character = ktorClient.getCharacters(characterId)
+         ktorClient
+            .getCharacters(characterId)
+            .onSuccess { apiCharacter ->
+                character = apiCharacter
+            }
+            .onFailure {
+                //handle exception
+            }
     }
 
     LazyColumn (
