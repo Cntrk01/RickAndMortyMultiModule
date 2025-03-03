@@ -66,7 +66,7 @@ fun CharacterDetailsScreen(
     }
 
     LaunchedEffect (Unit){
-        delay(500)
+        //delay(500)
          ktorClient
             .getCharacters(characterId)
             .onSuccess { apiCharacter ->
