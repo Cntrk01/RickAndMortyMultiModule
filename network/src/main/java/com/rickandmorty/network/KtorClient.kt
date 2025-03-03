@@ -35,13 +35,21 @@ class KtorClient {
     }
     //client.get("character/$id"): GET isteği yapar
     //.body<Character>(): Yanıtı Character veri modeline dönüştürür.
-    suspend fun getCharacters(id : Int) : ApiOperation<Character> =
-        safeApiCall {
+    suspend fun getCharacters(id : Int) : ApiOperation<Character>  {
+        characterCache[id]?.let { return ApiOperation.Success(data = it) } //Cache olayı yaptık.Burda aşağıda eklediği alsodan sonra kontrol yapıyor eğer bu idye sahipse api çağırısı yapmadan bloktan çıkıyor.
+
+        return safeApiCall {
             client
                 .get("character/$id")
                 .body<RemoteCharacter>()
                 .toDomainCharacter()
+                .also {
+                    characterCache[id] = it
+                }
+        }
     }
+
+    private var characterCache = mutableMapOf<Int,Character>()
 
     private inline fun <T>safeApiCall(apiCall : ()->T) : ApiOperation<T>{
         return try {
