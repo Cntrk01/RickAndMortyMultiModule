@@ -1,8 +1,11 @@
 package com.rickandmorty.network
 
 import com.rickandmorty.network.models.domain.Character
+import com.rickandmorty.network.models.domain.Episode
 import com.rickandmorty.network.models.remote.RemoteCharacter
+import com.rickandmorty.network.models.remote.RemoteEpisode
 import com.rickandmorty.network.models.remote.toDomainCharacter
+import com.rickandmorty.network.models.remote.toDomainEpisode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -46,6 +49,16 @@ class KtorClient {
                 .also {
                     characterCache[id] = it
                 }
+        }
+    }
+
+    suspend fun getEpisodes(episodesIds : List<Int>) : ApiOperation<List<Episode>>{
+        val idsSeparated = episodesIds.joinToString(separator = ",")
+        return safeApiCall {
+            client
+                .get("episode/$idsSeparated")
+                .body<List<RemoteEpisode>>()
+                .map { it.toDomainEpisode() }
         }
     }
 

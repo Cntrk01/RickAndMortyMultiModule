@@ -30,6 +30,7 @@ import androidx.navigation.navArgument
 import com.rickandmorty.network.KtorClient
 import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.rickandmortymultimodule.component.CharacterDetailsScreen
+import com.rickandmorty.rickandmortymultimodule.component.CharacterEpisodeScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
@@ -84,18 +85,14 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                          ){ backStackEntry ->
-                            CharacterEpisodeScreen(characterId = backStackEntry.arguments?.getInt("characterId") ?: 0)
+                            CharacterEpisodeScreen(
+                                characterId = backStackEntry.arguments?.getInt("characterId") ?: 0,
+                                ktorClient = ktorClient
+                            )
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun CharacterEpisodeScreen(characterId : Int){
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        Text(text = "Character episode screen : $characterId", fontSize = 28.sp, color = RickAction)
     }
 }

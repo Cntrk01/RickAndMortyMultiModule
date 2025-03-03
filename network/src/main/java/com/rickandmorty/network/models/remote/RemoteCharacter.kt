@@ -49,7 +49,7 @@ fun RemoteCharacter.toDomainCharacter() : Character{
 
     return Character(
         created = created,
-        episodeUrls = episode,
+        episodeIds =  episode.map { it.substring(it.lastIndexOf("/") + 1).toInt() },//"https://rickandmortyapi.com/api/character/42" en sondaki / dan +1 sonrasını alarak id yi alabiliriz.
         gender = characterGender,
         id = id,
         imageUrl = image,

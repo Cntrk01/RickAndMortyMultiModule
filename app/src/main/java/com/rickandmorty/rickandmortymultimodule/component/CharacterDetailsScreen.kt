@@ -59,7 +59,7 @@ fun CharacterDetailsScreen(
                         add(DataPoint(title = "Type",type))
                     }
                     add(DataPoint(title = "Origin",newList.origin.name))
-                    add(DataPoint(title = "Episode count",newList.episodeUrls.size.toString()))
+                    //add(DataPoint(title = "Episode count",newList.episodeUrls.size.toString()))
                 }
             }
         }
