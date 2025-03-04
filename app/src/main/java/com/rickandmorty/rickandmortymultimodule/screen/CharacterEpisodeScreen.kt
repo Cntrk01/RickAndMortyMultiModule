@@ -1,4 +1,4 @@
-package com.rickandmorty.rickandmortymultimodule.component
+package com.rickandmorty.rickandmortymultimodule.screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

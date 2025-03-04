@@ -1,4 +1,4 @@
-package com.rickandmorty.rickandmortymultimodule.component.screen.detail_screen
+package com.rickandmorty.rickandmortymultimodule.screen.detail_screen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +28,7 @@ import com.rickandmorty.rickandmortymultimodule.component.character.CharacterDet
 import com.rickandmorty.rickandmortymultimodule.component.common.DataPointComponent
 import com.rickandmorty.rickandmortymultimodule.component.common.LoadingState
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
+import com.rickandmorty.rickandmortymultimodule.viewmodels.CharacterDetailsViewModel
 
 @Composable
 fun CharacterDetailsScreen(

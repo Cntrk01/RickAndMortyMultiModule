@@ -13,8 +13,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rickandmorty.network.KtorClient
-import com.rickandmorty.rickandmortymultimodule.component.screen.detail_screen.CharacterDetailsScreen
-import com.rickandmorty.rickandmortymultimodule.component.CharacterEpisodeScreen
+import com.rickandmorty.rickandmortymultimodule.screen.detail_screen.CharacterDetailsScreen
+import com.rickandmorty.rickandmortymultimodule.screen.CharacterEpisodeScreen
+import com.rickandmorty.rickandmortymultimodule.screen.home_screen.HomeScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,8 +41,15 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = "character_details"
+                        startDestination = "home_screen"
                     ){
+                        composable("home_screen"){
+                            HomeScreen(
+                                onCharacterSelected = {
+                                    //navController.navigate("character_details")
+                                }
+                            )
+                        }
                         composable("character_details"){
                             CharacterDetailsScreen(
                                 onEpisodeClicked = {
