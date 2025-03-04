@@ -1,8 +1,11 @@
 package com.rickandmorty.network
 
 import com.rickandmorty.network.models.domain.Character
+import com.rickandmorty.network.models.domain.Episode
 import com.rickandmorty.network.models.remote.RemoteCharacter
+import com.rickandmorty.network.models.remote.RemoteEpisode
 import com.rickandmorty.network.models.remote.toDomainCharacter
+import com.rickandmorty.network.models.remote.toDomainEpisode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -33,6 +36,8 @@ class KtorClient {
             })
         }
     }
+    private var characterCache = mutableMapOf<Int,Character>()
+
     //client.get("character/$id"): GET isteği yapar
     //.body<Character>(): Yanıtı Character veri modeline dönüştürür.
     suspend fun getCharacters(id : Int) : ApiOperation<Character>  {
@@ -49,7 +54,15 @@ class KtorClient {
         }
     }
 
-    private var characterCache = mutableMapOf<Int,Character>()
+    suspend fun getEpisodes(episodesIds : List<Int>) : ApiOperation<List<Episode>>{
+        val idsSeparated = episodesIds.joinToString(separator = ",")
+        return safeApiCall {
+            client
+                .get("episode/$idsSeparated") //gelen idler joinToString ile stringe çevirilir ör : "1,2,3" şeklinde istek atılıp datayı çekeriz.
+                .body<List<RemoteEpisode>>()
+                .map { it.toDomainEpisode() }
+        }
+    }
 
     private inline fun <T>safeApiCall(apiCall : ()->T) : ApiOperation<T>{
         return try {
