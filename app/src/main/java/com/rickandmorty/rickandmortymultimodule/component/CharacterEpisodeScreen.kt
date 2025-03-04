@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -27,6 +29,8 @@ import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.network.models.domain.Episode
 import com.rickandmorty.rickandmortymultimodule.component.common.CharacterImage
 import com.rickandmorty.rickandmortymultimodule.component.common.CharacterNameComponent
+import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint
+import com.rickandmorty.rickandmortymultimodule.component.common.DataPointComponent
 import com.rickandmorty.rickandmortymultimodule.component.common.LoadingState
 import com.rickandmorty.rickandmortymultimodule.component.episode.EpisodeRowComponent
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
@@ -67,7 +71,6 @@ fun CharacterEpisodeScreen(
           }
   }
 
-
     characterState?.let {
         MainScreen(
             character = it,
@@ -82,15 +85,32 @@ private fun MainScreen(
     character: Character,
     episodes : List<Episode> = emptyList(),
 ){
+    val episodeBySeasonMap = episodes.groupBy { it.seasonNumber }
+
     LazyColumn (
         modifier = Modifier.padding(all = 16.dp)
     ){
         item { CharacterNameComponent(name = character.name) }
         item { Spacer(modifier = Modifier.height(16.dp))}
-        item { CharacterImage(imageUrl = character.imageUrl) }
+        item {
+            LazyRow {
+                episodeBySeasonMap.forEach {
+                    val title = "Season ${it.key}"
+                    val description = "${it.value.size} ep"
+                    item {
+                        DataPointComponent(dataPoint = DataPoint(title = title,description = description))
+                        Spacer(modifier = Modifier.width(32.dp))
+                    }
+                }
+            }
+        }
         item { Spacer(modifier = Modifier.height(16.dp))}
 
-        episodes.groupBy { it.seasonNumber }.forEach { mapEntry ->
+        item { CharacterImage(imageUrl = character.imageUrl) }
+
+        item { Spacer(modifier = Modifier.height(16.dp))}
+
+        episodeBySeasonMap.forEach { mapEntry ->
             //Başlık (header) bileşeninin, liste içinde kaydırılırken üstte sabit kalmasını (yapışmasını) sağlar.
             stickyHeader { SeasonHeader(seasonNumber = mapEntry.key) }
             item { Spacer(modifier = Modifier.height(16.dp)) }

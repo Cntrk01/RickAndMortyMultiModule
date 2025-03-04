@@ -36,6 +36,8 @@ class KtorClient {
             })
         }
     }
+    private var characterCache = mutableMapOf<Int,Character>()
+
     //client.get("character/$id"): GET isteği yapar
     //.body<Character>(): Yanıtı Character veri modeline dönüştürür.
     suspend fun getCharacters(id : Int) : ApiOperation<Character>  {
@@ -56,13 +58,11 @@ class KtorClient {
         val idsSeparated = episodesIds.joinToString(separator = ",")
         return safeApiCall {
             client
-                .get("episode/$idsSeparated")
+                .get("episode/$idsSeparated") //gelen idler joinToString ile stringe çevirilir ör : "1,2,3" şeklinde istek atılıp datayı çekeriz.
                 .body<List<RemoteEpisode>>()
                 .map { it.toDomainEpisode() }
         }
     }
-
-    private var characterCache = mutableMapOf<Int,Character>()
 
     private inline fun <T>safeApiCall(apiCall : ()->T) : ApiOperation<T>{
         return try {
