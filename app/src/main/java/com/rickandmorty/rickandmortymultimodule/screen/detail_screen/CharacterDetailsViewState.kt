@@ -1,4 +1,4 @@
-package com.rickandmorty.rickandmortymultimodule.component.screen.detail_screen
+package com.rickandmorty.rickandmortymultimodule.screen.detail_screen
 
 import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint

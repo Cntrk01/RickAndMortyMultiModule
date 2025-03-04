@@ -1,10 +1,13 @@
 package com.rickandmorty.network
 
 import com.rickandmorty.network.models.domain.Character
+import com.rickandmorty.network.models.domain.CharacterPage
 import com.rickandmorty.network.models.domain.Episode
 import com.rickandmorty.network.models.remote.RemoteCharacter
+import com.rickandmorty.network.models.remote.RemoteCharacterPage
 import com.rickandmorty.network.models.remote.RemoteEpisode
 import com.rickandmorty.network.models.remote.toDomainCharacter
+import com.rickandmorty.network.models.remote.toDomainCharacterPage
 import com.rickandmorty.network.models.remote.toDomainEpisode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -16,9 +19,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import java.lang.Exception
 
 class KtorClient {
     private val client = HttpClient(OkHttp){
@@ -53,6 +54,15 @@ class KtorClient {
                 }
         }
     }
+    suspend fun getCharacterByPage(pageNumber : Int) : ApiOperation<CharacterPage>{
+        return safeApiCall {
+            client
+                .get("character/?page=$pageNumber")
+                .body<RemoteCharacterPage>()
+                .toDomainCharacterPage()
+        }
+    }
+
     //şimdi şöyle 114.id de episode[] json değişkeninde yanlızca 1 tane episode olduğu için 1 taneyi liste olarak setlemeye çalıştığımızda(.get("episode/$idsSeparated") kısımında) episode gelmiyordu.
     //bundan dolayı 1 tane elemanı olan episode[] leri tek değerle apiden almamız gerekli.Ondan dolayı burda böylke bir method ekledim.
     private suspend fun getEpisodes(episodeId : Int) : ApiOperation<Episode>{

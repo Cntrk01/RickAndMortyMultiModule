@@ -1,8 +1,10 @@
-package com.rickandmorty.rickandmortymultimodule.component.screen.detail_screen
+package com.rickandmorty.rickandmortymultimodule.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint
+import com.rickandmorty.rickandmortymultimodule.screen.detail_screen.CharacterDetailsViewState
+import com.rickandmorty.rickandmortymultimodule.repositories.CharacterDetailsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
