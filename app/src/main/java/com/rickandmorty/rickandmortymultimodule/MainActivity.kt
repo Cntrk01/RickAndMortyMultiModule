@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                 onBackClicked = {
 
                                 },
-                                characterId = 1,
+                                characterId = 114,
                             )
                         }
                         composable(
