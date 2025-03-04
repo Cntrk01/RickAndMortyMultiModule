@@ -53,14 +53,34 @@ class KtorClient {
                 }
         }
     }
-
-    suspend fun getEpisodes(episodesIds : List<Int>) : ApiOperation<List<Episode>>{
-        val idsSeparated = episodesIds.joinToString(separator = ",")
+    //şimdi şöyle 114.id de episode[] json değişkeninde yanlızca 1 tane episode olduğu için 1 taneyi liste olarak setlemeye çalıştığımızda(.get("episode/$idsSeparated") kısımında) episode gelmiyordu.
+    //bundan dolayı 1 tane elemanı olan episode[] leri tek değerle apiden almamız gerekli.Ondan dolayı burda böylke bir method ekledim.
+    private suspend fun getEpisodes(episodeId : Int) : ApiOperation<Episode>{
         return safeApiCall {
             client
-                .get("episode/$idsSeparated") //gelen idler joinToString ile stringe çevirilir ör : "1,2,3" şeklinde istek atılıp datayı çekeriz.
-                .body<List<RemoteEpisode>>()
-                .map { it.toDomainEpisode() }
+                .get("episode/$episodeId")
+                .body<RemoteEpisode>()
+                .toDomainEpisode()
+        }
+    }
+
+    //mapSuccess deki R çıkış tipi aslıdna burdaki methodun dönüş tipini baz alır.Ve gelen T tipiyle sen burdaki R tipine dönüştürmeni bekler.
+    //getEpisodes deki T type Episode .Ben mapSuccess içinde bunu listOf yaparak aslında dıştaki methodun tipinde döndürdüm yani R tipi.
+    suspend fun getEpisodes(episodesIds : List<Int>) : ApiOperation<List<Episode>>{
+        val idsSeparated = episodesIds.joinToString(separator = ",")
+
+        return if (episodesIds.size == 1){
+            getEpisodes(episodeId = episodesIds.first())
+                .mapSuccess {
+                    listOf(it)
+                }
+        }else{
+            safeApiCall {
+                client
+                    .get("episode/$idsSeparated") //gelen idler joinToString ile stringe çevirilir ör : "1,2,3" şeklinde istek atılıp datayı çekeriz.
+                    .body<List<RemoteEpisode>>()
+                    .map { it.toDomainEpisode() }
+            }
         }
     }
 
@@ -76,6 +96,13 @@ class KtorClient {
 sealed interface ApiOperation<T>{
     data class Success<T>(val data : T) : ApiOperation<T>
     data class Failure<T>(val exception: Exception) : ApiOperation<T>
+
+    fun <R> mapSuccess(callback : (T) -> R) : ApiOperation<R>{
+        return when(this){
+            is Success -> Success(data = callback(data))
+            is Failure -> Failure(exception = exception)
+        }
+    }
 
     fun onSuccess(callback : (T) -> Unit) : ApiOperation<T> {
         if (this is Success) callback(data)
