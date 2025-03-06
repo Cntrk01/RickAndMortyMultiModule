@@ -1,8 +1,9 @@
-package com.rickandmorty.rickandmortymultimodule.screen
+package com.rickandmorty.rickandmortymultimodule.screen.episode_screen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +33,7 @@ import com.rickandmorty.rickandmortymultimodule.component.common.CharacterNameCo
 import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint
 import com.rickandmorty.rickandmortymultimodule.component.common.DataPointComponent
 import com.rickandmorty.rickandmortymultimodule.component.common.LoadingState
+import com.rickandmorty.rickandmortymultimodule.component.common.SimpleToolbar
 import com.rickandmorty.rickandmortymultimodule.component.episode.EpisodeRowComponent
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickTextPrimary
@@ -40,7 +42,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun CharacterEpisodeScreen(
     characterId : Int,
-    ktorClient: KtorClient
+    ktorClient: KtorClient,
+    onBackAction: (() -> Unit)?,
 ){
   var characterState by remember {
       mutableStateOf<Character?>(null)
@@ -75,6 +78,7 @@ fun CharacterEpisodeScreen(
         MainScreen(
             character = it,
             episodes = episodesState,
+            onBackAction = onBackAction,
         )
     } ?: LoadingState()
 }
@@ -84,38 +88,42 @@ fun CharacterEpisodeScreen(
 private fun MainScreen(
     character: Character,
     episodes : List<Episode> = emptyList(),
+    onBackAction: (() -> Unit)? = null
 ){
     val episodeBySeasonMap = episodes.groupBy { it.seasonNumber }
 
-    LazyColumn (
-        modifier = Modifier.padding(all = 16.dp)
-    ){
-        item { CharacterNameComponent(name = character.name) }
-        item { Spacer(modifier = Modifier.height(16.dp))}
-        item {
-            LazyRow {
-                episodeBySeasonMap.forEach {
-                    val title = "Season ${it.key}"
-                    val description = "${it.value.size} ep"
-                    item {
-                        DataPointComponent(dataPoint = DataPoint(title = title,description = description))
-                        Spacer(modifier = Modifier.width(32.dp))
+    Column {
+        SimpleToolbar(title = "Episodes", onBackAction = onBackAction)
+        LazyColumn (
+            modifier = Modifier.padding(all = 16.dp)
+        ){
+            item { CharacterNameComponent(name = character.name) }
+            item { Spacer(modifier = Modifier.height(16.dp))}
+            item {
+                LazyRow {
+                    episodeBySeasonMap.forEach {
+                        val title = "Season ${it.key}"
+                        val description = "${it.value.size} ep"
+                        item {
+                            DataPointComponent(dataPoint = DataPoint(title = title,description = description))
+                            Spacer(modifier = Modifier.width(32.dp))
+                        }
                     }
                 }
             }
-        }
-        item { Spacer(modifier = Modifier.height(16.dp))}
+            item { Spacer(modifier = Modifier.height(16.dp))}
 
-        item { CharacterImage(imageUrl = character.imageUrl) }
+            item { CharacterImage(imageUrl = character.imageUrl) }
 
-        item { Spacer(modifier = Modifier.height(16.dp))}
+            item { Spacer(modifier = Modifier.height(16.dp))}
 
-        episodeBySeasonMap.forEach { mapEntry ->
-            //Başlık (header) bileşeninin, liste içinde kaydırılırken üstte sabit kalmasını (yapışmasını) sağlar.
-            stickyHeader { SeasonHeader(seasonNumber = mapEntry.key) }
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-            items(mapEntry.value){ episode ->
-                EpisodeRowComponent(episode = episode)
+            episodeBySeasonMap.forEach { mapEntry ->
+                //Başlık (header) bileşeninin, liste içinde kaydırılırken üstte sabit kalmasını (yapışmasını) sağlar.
+                stickyHeader { SeasonHeader(seasonNumber = mapEntry.key) }
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+                items(mapEntry.value){ episode ->
+                    EpisodeRowComponent(episode = episode)
+                }
             }
         }
     }
