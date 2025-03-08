@@ -3,12 +3,15 @@ package com.rickandmorty.network
 import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.network.models.domain.CharacterPage
 import com.rickandmorty.network.models.domain.Episode
+import com.rickandmorty.network.models.domain.EpisodePage
 import com.rickandmorty.network.models.remote.RemoteCharacter
 import com.rickandmorty.network.models.remote.RemoteCharacterPage
 import com.rickandmorty.network.models.remote.RemoteEpisode
+import com.rickandmorty.network.models.remote.RemoteEpisodePage
 import com.rickandmorty.network.models.remote.toDomainCharacter
 import com.rickandmorty.network.models.remote.toDomainCharacterPage
 import com.rickandmorty.network.models.remote.toDomainEpisode
+import com.rickandmorty.network.models.remote.toDomainEpisodePage
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
@@ -19,6 +22,13 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.Json
 
 class KtorClient {
@@ -36,7 +46,67 @@ class KtorClient {
                 ignoreUnknownKeys = true //API'den gelen ancak Character modelinde tanımlı olmayan alanlar göz ardı edilir ve hata alınmaz.
             })
         }
+
+        expectSuccess = true
     }
+
+    private suspend fun getEpisodesByPage(pageIndex : Int) : ApiOperation<EpisodePage>{
+        return safeApiCall {
+            client.get("episode"){
+                url{
+                    parameters.append("page",pageIndex.toString())
+                }
+            }.body<RemoteEpisodePage>()
+                .toDomainEpisodePage()
+        }
+    }
+
+    suspend fun getAllEpisodes(): ApiOperation<List<Episode>> {
+        val data = mutableListOf<Episode>()
+        var exception : Exception ?= null
+        var totalPageCount = 0
+
+        try {
+            val firstJob = CoroutineScope(Dispatchers.IO).launch {
+                getEpisodesByPage(pageIndex = 1)
+                    .onSuccess { firstPageResult ->
+                        totalPageCount = firstPageResult.info.pages
+                        data.addAll(firstPageResult.episodes.toMutableList())
+                    }
+                    .onFailure {
+                        exception = it
+                    }
+            }
+
+            firstJob.join()
+
+            if (exception == null) {
+                val secondJob = CoroutineScope(Dispatchers.IO).launch {
+                    val deferred = (2..totalPageCount).map { pageIndex ->
+                        async {
+                            getEpisodesByPage(pageIndex)
+                                .onSuccess { nextPage ->
+                                    data.addAll(nextPage.episodes)
+                                }
+                                .onFailure {
+                                    exception = it
+                                }
+                        }
+                    }
+                    deferred.awaitAll()
+                }
+                secondJob.join()
+            }
+
+            ApiOperation.Success(data.toList())
+
+        } catch (e: Exception) {
+            ApiOperation.Failure(e)
+        }
+
+        return exception?.let { ApiOperation.Failure(it) } ?: ApiOperation.Success(data.toList())
+    }
+
     private var characterCache = mutableMapOf<Int,Character>()
 
     //client.get("character/$id"): GET isteği yapar

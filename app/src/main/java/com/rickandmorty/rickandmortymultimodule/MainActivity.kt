@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -18,11 +17,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,8 +35,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.rickandmorty.network.KtorClient
+import com.rickandmorty.rickandmortymultimodule.screen.all_episode_screen.AllEpisodeScreen
 import com.rickandmorty.rickandmortymultimodule.screen.detail_screen.CharacterDetailsScreen
-import com.rickandmorty.rickandmortymultimodule.screen.episode_screen.CharacterEpisodeScreen
+import com.rickandmorty.rickandmortymultimodule.screen.detail_episode_screen.CharacterEpisodeScreen
 import com.rickandmorty.rickandmortymultimodule.screen.home_screen.HomeScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
@@ -177,13 +174,7 @@ class MainActivity : ComponentActivity() {
 
                             navigation(startDestination = NavDestination.Episodes.route, route = "episodes_graph"){
                                 composable(route = NavDestination.Episodes.route) {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(text = "Episodes", fontSize = 24.sp)
-                                    }
+                                    AllEpisodeScreen()
                                 }
                             }
 
