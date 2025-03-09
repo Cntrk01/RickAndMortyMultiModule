@@ -39,6 +39,7 @@ import com.rickandmorty.rickandmortymultimodule.screen.all_episode_screen.AllEpi
 import com.rickandmorty.rickandmortymultimodule.screen.detail_screen.CharacterDetailsScreen
 import com.rickandmorty.rickandmortymultimodule.screen.detail_episode_screen.CharacterEpisodeScreen
 import com.rickandmorty.rickandmortymultimodule.screen.home_screen.HomeScreen
+import com.rickandmorty.rickandmortymultimodule.screen.search_screen.SearchScreen
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
@@ -180,13 +181,7 @@ class MainActivity : ComponentActivity() {
 
                             navigation(startDestination = NavDestination.Search.route, route = "search_graph"){
                                 composable(route = NavDestination.Search.route) {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        Text(text = "Search", fontSize = 24.sp)
-                                    }
+                                    SearchScreen()
                                 }
                             }
                         }

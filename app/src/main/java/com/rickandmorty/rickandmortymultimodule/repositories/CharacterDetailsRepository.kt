@@ -9,10 +9,6 @@ import javax.inject.Inject
 class CharacterDetailsRepository @Inject constructor(
     private val ktorClient: KtorClient,
 ){
-    suspend fun fetchCharacterPage(page : Int) : ApiOperation<CharacterPage> {
-        return ktorClient.getCharacterByPage(page)
-    }
-
     suspend fun fetchCharacterDetails(characterId : Int) : ApiOperation<Character> {
         return ktorClient.getCharacters(characterId)
     }

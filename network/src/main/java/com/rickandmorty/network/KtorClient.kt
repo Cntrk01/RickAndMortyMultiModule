@@ -43,6 +43,48 @@ class KtorClient {
         expectSuccess = true
     }
 
+    suspend fun getCharacterByPage(
+        pageNumber: Int,
+        queryParams: Map<String, String>
+    ): ApiOperation<CharacterPage> {
+        return safeApiCall {
+            client.get("character") {
+                url {
+                    parameters.append("page", pageNumber.toString())
+                    queryParams.forEach { parameters.append(it.key, it.value) }
+                }
+            }
+                .body<RemoteCharacterPage>()
+                .toDomainCharacterPage()
+        }
+    }
+
+    suspend fun searchAllCharactersByName(
+        searchQuery: String
+    ): ApiOperation<List<Character>> {
+        return getCharacterByPage(
+            pageNumber = 1,
+            queryParams = mapOf("name" to searchQuery)
+        ).operationFlatMap { firstPage ->
+            val totalPageCount = firstPage.info.pages
+
+            (2..totalPageCount).fold(
+                initial = ApiOperation.Success(firstPage.characters.toMutableList()) as ApiOperation<MutableList<Character>>
+            ) { acc, pageIndex ->
+                acc.operationFlatMap { characters ->
+                    getCharacterByPage(
+                        pageNumber = pageIndex,
+                        queryParams = mapOf("name" to searchQuery)
+                    ).mapSuccess { nextPage ->
+                        characters.addAll(nextPage.characters)
+                        characters
+                    }
+                }
+            }.mapSuccess { it.toList() } // Listeye dönüştürme
+        }
+    }
+
+
     private suspend fun getEpisodesByPage(pageIndex : Int) : ApiOperation<EpisodePage>{
         return safeApiCall {
             client.get("episode"){
