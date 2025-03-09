@@ -22,13 +22,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.Json
 
 class KtorClient {
@@ -62,49 +55,23 @@ class KtorClient {
     }
 
     suspend fun getAllEpisodes(): ApiOperation<List<Episode>> {
-        val data = mutableListOf<Episode>()
-        var exception : Exception ?= null
-        var totalPageCount = 0
-
-        try {
-            val firstJob = CoroutineScope(Dispatchers.IO).launch {
-                getEpisodesByPage(pageIndex = 1)
-                    .onSuccess { firstPageResult ->
-                        totalPageCount = firstPageResult.info.pages
-                        data.addAll(firstPageResult.episodes.toMutableList())
-                    }
-                    .onFailure {
-                        exception = it
-                    }
-            }
-
-            firstJob.join()
-
-            if (exception == null) {
-                val secondJob = CoroutineScope(Dispatchers.IO).launch {
-                    val deferred = (2..totalPageCount).map { pageIndex ->
-                        async {
-                            getEpisodesByPage(pageIndex)
-                                .onSuccess { nextPage ->
-                                    data.addAll(nextPage.episodes)
-                                }
-                                .onFailure {
-                                    exception = it
-                                }
+        return getEpisodesByPage(1)
+            .operationFlatMap { firstPageResult ->
+                val totalPageCount = firstPageResult.info.pages
+                (2..totalPageCount).fold(
+                    initial = ApiOperation.Success(firstPageResult.episodes.toMutableList()) as ApiOperation<MutableList<Episode>>
+                ) { acc, pageIndex ->
+                    acc.operationFlatMap { episodes ->
+                        getEpisodesByPage(pageIndex).mapSuccess { nextPage ->
+                            episodes.addAll(nextPage.episodes)
+                            episodes
                         }
                     }
-                    deferred.awaitAll()
                 }
-                secondJob.join()
+            .mapSuccess {
+                it.toList()
             }
-
-            ApiOperation.Success(data.toList())
-
-        } catch (e: Exception) {
-            ApiOperation.Failure(e)
         }
-
-        return exception?.let { ApiOperation.Failure(it) } ?: ApiOperation.Success(data.toList())
     }
 
     private var characterCache = mutableMapOf<Int,Character>()
@@ -184,6 +151,13 @@ sealed interface ApiOperation<T>{
         }
     }
 
+    suspend fun <R> operationFlatMap(callback: suspend (T) -> ApiOperation<R>): ApiOperation<R> {
+        return when (this) {
+            is Success -> callback(data)
+            is Failure -> Failure(this.exception)
+        }
+    }
+
     fun onSuccess(callback : (T) -> Unit) : ApiOperation<T> {
         if (this is Success) callback(data)
         return this
@@ -193,5 +167,4 @@ sealed interface ApiOperation<T>{
         if (this is Failure) callback(exception)
         return this
     }
-
 }
