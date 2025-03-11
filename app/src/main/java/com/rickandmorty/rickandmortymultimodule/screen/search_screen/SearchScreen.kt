@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -56,6 +57,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -79,8 +81,14 @@ sealed interface ScreenState{
     data class Error(val message : String) : ScreenState
     data class Content(
         val userQuery : String,
-        val results : List<Character>
-    ) : ScreenState
+        val results : List<Character>,
+        val filterState : FilterState,
+    ) : ScreenState{
+        data class FilterState(
+            val statuses : List<CharacterStatus>,
+            val selectedStatuses : List<CharacterStatus>, //seçilmiş olan statüleri temsil ediyor
+        )
+    }
 }
 
 @HiltViewModel
@@ -99,9 +107,12 @@ class SearchViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000), //Eğer abone yoksa (UI bu değeri kullanmıyorsa), 5 saniye sonra durur.Abone bağlanırsa tekrar başlar.
             initialValue = SearchState.Empty,
         )
+    //Burda initial valueye eklemem birşey ifade etmiyor 1 kere oluşturulduğu için yanlızca 1 kez çalışıcak yani ekran geçişlerinde tekrar oluşturulmuyor.Bundan dolayı initial value empty vermem search durumundaki state sorununu ortaya çıkarmıyor.
+    // if (searchTextFieldState.text.isBlank()) SearchState.Empty
+    // else SearchState.UserQuery(searchTextFieldState.text.toString()),
 
     private val _uiState = MutableStateFlow<ScreenState>(ScreenState.Empty)
-    val uiState   = _uiState .asStateFlow()
+    val uiState = _uiState .asStateFlow()
 
     fun observeUserSearch() = viewModelScope.launch (Dispatchers.IO){
         searchTextState.collectLatest{ searchState->
@@ -111,22 +122,54 @@ class SearchViewModel @Inject constructor(
                         ScreenState.Empty
                     }
                 }
-                is SearchState.UserQuery -> searchAllCharacters(query = searchState.query)
+                is SearchState.UserQuery -> {
+                    val currentState = _uiState.value
+                    //Burda bu kontrolü ekleme sebebim her detay sayfasına gidip döndüğümde servise tekrar istek atıp searchAllCharacters() methodunu çağırıyordu.
+                    //Bende hali hazırda bir state olduğu için bunun kontrolünü sağladım.Böylelikle detaydan dönünce state korumasına devam ediyor.
+                    if (currentState is ScreenState.Content && currentState.userQuery == searchState.query) {
+                        return@collectLatest
+                    }else{
+                        searchAllCharacters(query = searchState.query)
+                    }
+                }
             }
         }
     }
 
-    private fun searchAllCharacters(
-        query: String
-    ) = viewModelScope.launch (Dispatchers.IO){
-        _uiState.update { ScreenState.Searching }
+    fun toggleStatusFilter(status: CharacterStatus) {
+        _uiState.update {
+            val currentState = (it as? ScreenState.Content) ?: return@update it
+            val currentSelectedStatuses = currentState.filterState.selectedStatuses
 
+            val newStatus = if (currentSelectedStatuses.contains(status)){
+                currentSelectedStatuses - status
+            }else{
+                currentSelectedStatuses + status
+            }
+
+            return@update currentState.copy(
+                filterState = currentState.filterState.copy(
+                    selectedStatuses = newStatus
+                )
+            )
+        }
+    }
+
+    private fun searchAllCharacters(query: String)= viewModelScope.launch (Dispatchers.IO){
+        _uiState.update { ScreenState.Searching }
+        delay(1200) //LinearProgressIndicator için.
         searchRepository.getAllCharactersByName(searchQuery = query)
             .onSuccess { characters->
+                val allStatus = characters.map { it.status }.toSet().toList().sortedBy { it.displayName }
+
                 _uiState.update {
                     ScreenState.Content(
                         userQuery = query,
-                        results = characters
+                        results = characters,
+                        filterState = ScreenState.Content.FilterState(
+                            statuses = allStatus,
+                            selectedStatuses = allStatus,
+                        )
                     )
                 }
             }
@@ -140,8 +183,8 @@ class SearchViewModel @Inject constructor(
 fun SearchScreen(
     modifier: Modifier = Modifier,
     searchViewModel: SearchViewModel = hiltViewModel(),
+    onCharacterClicked: (Int) -> Unit,
 ) {
-
     DisposableEffect(key1 = Unit){
         val job = searchViewModel.observeUserSearch()
 
@@ -155,10 +198,26 @@ fun SearchScreen(
     ){
         SimpleToolbar(title = "Search")
 
+        val screenState by searchViewModel.uiState.collectAsStateWithLifecycle()
+
+        AnimatedVisibility(visible = screenState is ScreenState.Searching) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .height(5.dp)
+                    .fillMaxWidth(),
+                color = RickAction
+            )
+        }
+
         Row (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(
+                    start = 16.dp,
+                    top = 16.dp,
+                    end = 16.dp,
+                    bottom = 8.dp,
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ){
@@ -197,8 +256,6 @@ fun SearchScreen(
                 )
             }
         }
-        
-        val screenState by searchViewModel.uiState.collectAsStateWithLifecycle()
 
         when(val state = screenState){
             ScreenState.Empty -> {
@@ -215,8 +272,8 @@ fun SearchScreen(
             ScreenState.Searching -> {}
             is ScreenState.Content -> SearchScreenContent(
                 content = state,
-                onStatusClicked = {},
-                onCharacterClicked = {}
+                onStatusClicked = searchViewModel::toggleStatusFilter,
+                onCharacterClicked = {onCharacterClicked(it)}
             )
             is ScreenState.Error -> {
                 Text(
@@ -246,18 +303,66 @@ private fun SearchScreenContent(
     Text(
         text = "${content.results.size} results for '${content.userQuery}'",
         color = Color.White,
-        modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
+        modifier = Modifier.padding(
+            start = 16.dp,
+            bottom = 4.dp
+        ),
         fontSize = 14.sp
     )
 
+    Row (
+        modifier = Modifier.padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ){
+        //Hepsi en başta seçili geliyor.Tıkladığımızı listeden çıkarıyor.
+        content.filterState.statuses.forEach { status ->
+            val isSelected = content.filterState.selectedStatuses.contains(status)
+            val contentColor = if (isSelected) RickAction else Color.LightGray
+            val count = content.results.filter { it.status == status }.size
+
+            Row (
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = contentColor,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        onStatusClicked(status)
+                    },
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ){
+                Text(
+                    modifier = Modifier
+                        .background(color = contentColor)
+                        .padding(4.dp),
+                    text = count.toString(),
+                    color = RickPrimary,
+                )
+                Text(
+                    modifier = Modifier.padding(horizontal = 6.dp),
+                    text = status.displayName,
+                    color = Color.White,
+                )
+            }
+        }
+    }
+
     Box {
         LazyColumn(
+            modifier = Modifier.clipToBounds(), // alive dead unknowna tıkladığımızda görünüm bozuluyor.Yani içerdeki itemler anlık yukarı taşıp tekrar görünüyor bundan dolayı lazycolumn sınırları dışına çıkmamasını sağladım...
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 24.dp, top = 8.dp),
-            modifier = Modifier.clipToBounds()
         ) {
+            val filteredItem = content.results.filter { content.filterState.selectedStatuses.contains(it.status) }
+
             items(
-                content.results
+                items = filteredItem,
+                key = { character ->
+                    character.id
+                }
             ) { character ->
                 val dataPoints = buildList {
                     add(DataPoint("Last known location", character.location.name))
