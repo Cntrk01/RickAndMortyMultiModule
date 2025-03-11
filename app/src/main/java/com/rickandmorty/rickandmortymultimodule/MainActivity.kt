@@ -79,7 +79,6 @@ class MainActivity : ComponentActivity() {
             }
 
             RickAndMortyMultiModuleTheme {
-
                     Scaffold(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -88,9 +87,6 @@ class MainActivity : ComponentActivity() {
                             NavigationBar(
                                 containerColor = RickPrimary,
                             ) {
-                                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                                val currentDestination = navBackStackEntry?.destination //
-
                                 bottomBarItems.forEachIndexed { index, item ->
                                     NavigationBarItem(
                                         icon = {
@@ -126,7 +122,8 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             startDestination = "home_graph",
                         ) {
-
+                            //Bunlar birer farklı navigation graph olduğu için sadece ilk itemin yani Home.route statesini koruyor.Diğerlerini hep en baştan başlatıyor.Fakat bunun da sebebi  popUpTo(navController.graph.startDestinationId) şu kısımla ilgili olduğunu düşünüyorum.Çözümünü bulamadım.
+                            //Ama bunları direk navigation olmadan navhost içerisinde composable olarak çağırdığımızda her bottomnavitemin statesini tututyor ve tıkladığımda ordan devam ediyor.
                             navigation(startDestination = NavDestination.Home.route, route = "home_graph") {
                                 composable("home_screen") {
                                     HomeScreen(
@@ -181,7 +178,11 @@ class MainActivity : ComponentActivity() {
 
                             navigation(startDestination = NavDestination.Search.route, route = "search_graph"){
                                 composable(route = NavDestination.Search.route) {
-                                    SearchScreen()
+                                    SearchScreen(
+                                        onCharacterClicked = { characterId ->
+                                            navController.navigate("character_details/$characterId")
+                                        }
+                                    )
                                 }
                             }
                         }
