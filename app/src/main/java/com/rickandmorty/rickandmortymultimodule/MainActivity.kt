@@ -59,8 +59,7 @@ sealed class NavDestination(
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @Inject
-    lateinit var ktorClient : KtorClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,6 +101,7 @@ class MainActivity : ComponentActivity() {
                                             navController.navigate(item.route){
                                                 popUpTo(navController.graph.startDestinationId){
                                                     saveState = true
+                                                    inclusive = true
                                                 }
                                                 launchSingleTop = true
                                                 restoreState = true
@@ -162,7 +162,6 @@ class MainActivity : ComponentActivity() {
                                     CharacterEpisodeScreen(
                                         characterId = backStackEntry.arguments?.getInt("characterId")
                                             ?: 0,
-                                        ktorClient = ktorClient,
                                         onBackAction = {
                                             navController.navigateUp()
                                         }
@@ -171,6 +170,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             navigation(startDestination = NavDestination.Episodes.route, route = "episodes_graph"){
+
                                 composable(route = NavDestination.Episodes.route) {
                                     AllEpisodeScreen()
                                 }

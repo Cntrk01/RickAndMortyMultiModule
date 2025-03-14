@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rickandmorty.network.KtorClient
 import com.rickandmorty.network.models.domain.Character
 import com.rickandmorty.network.models.domain.Episode
@@ -37,50 +39,35 @@ import com.rickandmorty.rickandmortymultimodule.component.common.SimpleToolbar
 import com.rickandmorty.rickandmortymultimodule.component.episode.EpisodeRowComponent
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickPrimary
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickTextPrimary
+import com.rickandmorty.rickandmortymultimodule.viewmodels.CharacterEpisodeViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun CharacterEpisodeScreen(
     characterId : Int,
-    ktorClient: KtorClient,
     onBackAction: (() -> Unit)?,
+    viewModel : CharacterEpisodeViewModel = hiltViewModel(),
 ){
-  var characterState by remember {
-      mutableStateOf<Character?>(null)
-  }
-  var episodesState by remember {
-      mutableStateOf<List<Episode>>(emptyList())
-  }
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   LaunchedEffect (Unit){
-      ktorClient
-          .getCharacters(characterId)
-          .onSuccess { character ->
-            characterState = character
-
-              launch {
-                  ktorClient
-                      .getEpisodes(character.episodeIds)
-                      .onSuccess { episodeList->
-                          episodesState = episodeList
-                      }
-                      .onFailure {
-                          //TODO: Hata durumunda ne yapılacak
-                      }
-              }
-          }
-          .onFailure {
-            //TODO: Hata durumunda ne yapılacak
-          }
+      viewModel.getCharacterEpisodes(characterId = characterId)
   }
 
-    characterState?.let {
-        MainScreen(
-            character = it,
-            episodes = episodesState,
-            onBackAction = onBackAction,
-        )
-    } ?: LoadingState()
+  when(uiState){
+      is CharacterEpisodeUiState.Error -> Text(text = "Not Found Episode")
+      is CharacterEpisodeUiState.Loading -> LoadingState()
+      is CharacterEpisodeUiState.Success ->
+          with((uiState as CharacterEpisodeUiState.Success)){
+              character?.let {
+                  MainScreen(
+                      character = it,
+                      episodes = data,
+                      onBackAction = onBackAction,
+                  )
+          }
+      }
+  }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

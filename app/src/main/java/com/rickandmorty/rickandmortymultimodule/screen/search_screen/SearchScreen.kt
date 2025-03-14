@@ -101,7 +101,10 @@ class SearchViewModel @Inject constructor(
     private val searchTextState : StateFlow<SearchState> = snapshotFlow { searchTextFieldState.text }
         .debounce(500) //Kullanıcı yazarken 500ms bekler. Eğer kullanıcı 500ms içinde yeni bir karakter yazarsa, önceki karakter iptal edilir ve yeniden başlar.
         .mapLatest { //gelen yeni veriyle önceki işlemi iptal edip en güncel veriyi işler.Burda da gelen  string değerine göre if condition yazıyoruz.
-            if (it.isBlank()) SearchState.Empty else SearchState.UserQuery(it.toString())
+            if (it.isBlank())
+                SearchState.Empty
+            else
+                SearchState.UserQuery(it.toString())
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000), //Eğer abone yoksa (UI bu değeri kullanmıyorsa), 5 saniye sonra durur.Abone bağlanırsa tekrar başlar.
