@@ -11,10 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rickandmorty.network.models.domain.CharacterStatus
+import com.rickandmortymultimodule.domain.model.CharacterStatus
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAndMortyMultiModuleTheme
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickTextPrimary
-import com.rickandmorty.rickandmortymultimodule.utils.asColor
 
 @Composable
 fun CharacterStatusComponent(characterStatus: CharacterStatus) {
@@ -23,10 +22,13 @@ fun CharacterStatusComponent(characterStatus: CharacterStatus) {
         modifier = Modifier
             .border(
                 width = 1.dp,
-                color = characterStatus.color,
+                color = characterStatus.toNewColor(),
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(
+                horizontal = 12.dp,
+                vertical = 4.dp,
+            )
     ) {
         Text(
             text = "Status: ${characterStatus.displayName}",

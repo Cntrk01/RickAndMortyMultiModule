@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.rickandmorty.network.models.domain.CharacterStatus
-import com.rickandmorty.rickandmortymultimodule.component.common.CharacterNameComponent
+import com.rickandmortymultimodule.domain.model.CharacterStatus
+import com.rickandmortymultimodule.common.ui_elements.CharacterNameComponent
 
 @Composable
 fun CharacterDetailsNamePlateComponent(

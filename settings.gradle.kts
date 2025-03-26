@@ -21,4 +21,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "RickAndMortyMultiModule"
 include(":app")
-include(":network")
+include(":domain")
+include(":common")
+include(":data")

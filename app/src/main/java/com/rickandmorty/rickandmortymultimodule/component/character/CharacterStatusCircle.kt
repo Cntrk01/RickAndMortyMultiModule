@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rickandmorty.network.models.domain.CharacterStatus
+import com.rickandmortymultimodule.domain.model.CharacterStatus
 
 @Composable
 fun CharacterStatusCircle(
@@ -30,7 +30,10 @@ fun CharacterStatusCircle(
     ){
         Box(modifier = Modifier
             .size(10.dp)
-            .background(color = status.color, shape = CircleShape))
+            .background(
+                color = status.toNewColor(),
+                shape = CircleShape,
+            ))
     }
 }
 

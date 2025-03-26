@@ -21,17 +21,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rickandmorty.network.models.domain.CharacterGender
-import com.rickandmorty.network.models.domain.CharacterStatus
-import com.rickandmorty.rickandmortymultimodule.component.common.CharacterImage
-import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint
-import com.rickandmorty.rickandmortymultimodule.component.common.DataPointComponent
+import com.rickandmortymultimodule.common.ui_elements.DataPoint
+import com.rickandmortymultimodule.domain.model.Character
+import com.rickandmortymultimodule.domain.model.CharacterGender
+import com.rickandmortymultimodule.domain.model.CharacterStatus
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
+import com.rickandmortymultimodule.common.ui_elements.CharacterImage
+import com.rickandmortymultimodule.common.ui_elements.DataPointComponent
 
 @Composable
 fun CharacterListItem(
     modifier: Modifier = Modifier,
-    character: com.rickandmorty.network.models.domain.Character,
+    character: Character,
     characterDataPoints: List<DataPoint>,
     onClick: () -> Unit
 ) {
@@ -75,7 +76,11 @@ fun CharacterListItem(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(end = 16.dp)
                     ) {
-                        DataPointComponent(dataPoint = sanitizeDataPoint(dataPoint = dataPoint))
+                        DataPointComponent(
+                            dataPoint = sanitizeDataPoint(
+                                dataPoint = dataPoint
+                            )
+                        )
                     }
                 }
             })
@@ -95,18 +100,18 @@ private fun sanitizeDataPoint(dataPoint: DataPoint): DataPoint {
 @Composable
 private fun CharacterListItemPreview() {
     CharacterListItem(
-        character = com.rickandmorty.network.models.domain.Character(
+        character = Character(
             created = "timestamp",
             episodeIds = listOf(1, 2, 3, 4, 5),
             gender = CharacterGender.Male,
             id = 123,
             imageUrl = "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
-            location = com.rickandmorty.network.models.domain.Character.Location(
+            location = Character.Location(
                 name = "Earth",
                 url = ""
             ),
             name = "Morty Smith",
-            origin = com.rickandmorty.network.models.domain.Character.Origin(
+            origin = Character.Origin(
                 name = "Earth",
                 url = ""
             ),
@@ -115,11 +120,26 @@ private fun CharacterListItemPreview() {
             type = ""
         ),
         characterDataPoints = listOf(
-            DataPoint(title = "Title 1", description = "Description 1"),
-            DataPoint(title = "Title 2", description = "Description 2"),
-            DataPoint(title = "Title 3", description = "Description 3"),
-            DataPoint(title = "Title 4", description = "Description 4"),
-            DataPoint(title = "Title 5", description = "Description 5"),
+            DataPoint(
+                title = "Title 1",
+                description = "Description 1"
+            ),
+            DataPoint(
+                title = "Title 2",
+                description = "Description 2"
+            ),
+           DataPoint(
+                title = "Title 3",
+                description = "Description 3"
+            ),
+            DataPoint(
+                title = "Title 4",
+                description = "Description 4"
+            ),
+            DataPoint(
+                title = "Title 5",
+                description = "Description 5"
+            ),
         ),
         onClick = {}
     )

@@ -1,18 +1,14 @@
 package com.rickandmorty.rickandmortymultimodule.component.character
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -21,10 +17,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rickandmorty.network.models.domain.Character
-import com.rickandmorty.network.models.domain.CharacterGender
-import com.rickandmorty.network.models.domain.CharacterStatus
-import com.rickandmorty.rickandmortymultimodule.component.common.CharacterImage
+import com.rickandmortymultimodule.domain.model.Character
+import com.rickandmortymultimodule.domain.model.CharacterGender
+import com.rickandmortymultimodule.domain.model.CharacterStatus
+import com.rickandmortymultimodule.common.ui_elements.CharacterImage
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickAction
 
 @Composable
@@ -48,7 +44,10 @@ fun CharacterGridItem(
             }
     ){
         Box {
-            CharacterImage(imageUrl = character.imageUrl)
+            CharacterImage(
+                modifier = Modifier.fillMaxWidth(),
+                imageUrl = character.imageUrl,
+            )
             CharacterStatusCircle(
                 status = character.status,
                 modifier = Modifier.padding(start = 6.dp, top = 6.dp)
