@@ -14,9 +14,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rickandmorty.network.models.domain.Episode
-import com.rickandmorty.rickandmortymultimodule.component.common.DataPoint
-import com.rickandmorty.rickandmortymultimodule.component.common.DataPointComponent
+import com.rickandmortymultimodule.common.ui_elements.DataPoint
+import com.rickandmortymultimodule.common.ui_elements.DataPointComponent
+import com.rickandmortymultimodule.domain.model.Episode
 import com.rickandmorty.rickandmortymultimodule.ui.theme.RickTextPrimary
 
 @Composable
@@ -81,49 +81,6 @@ private fun EpisodeRowComponentPreview() {
             123,
             135,
             143,
-            165,
-            180,
-            187,
-            206,
-            220,
-            229,
-            233,
-            235,
-            267,
-            278,
-            281,
-            283,
-            284,
-            287,
-            288,
-            289,
-            291,
-            292,
-            322,
-            325,
-            328,
-            345,
-            366,
-            367,
-            392,
-            472,
-            473,
-            474,
-            475,
-            476,
-            477,
-            478,
-            479,
-            480,
-            481,
-            482,
-            483,
-            484,
-            485,
-            486,
-            487,
-            488,
-            489
         )
     )
 
