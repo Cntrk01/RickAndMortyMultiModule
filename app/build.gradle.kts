@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.dagger.hilt.android)
+    id("kotlin-kapt")
 }
 
 android {
@@ -47,19 +50,28 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    hilt {
+        enableAggregatingTask = false
+    }
 }
 
 dependencies {
-    implementation(project(":network"))
+    //Data katmanını buraya eklemediğim için buradaki viewmodeldeki injectler bağlanmıyordu.Eklemeyi unutma !
+    implementation(project(":domain"))
+    implementation(project(":common"))
+    implementation(project(":data"))
+
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.bundles.ui)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,4 +79,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    //Dagger Hilt
+    implementation(libs.hilt.android)
+    implementation (libs.androidx.hilt.navigation.compose)
+    kapt(libs.hilt.android.compiler)
 }
