@@ -33,6 +33,7 @@ I tried to make and implement Algebraic data type and monad definitions that I d
 </li>
 </ul>
 
+<h1>Görseller</h1>
 
 <p align="center">
   <img src="assets/Screenshot_20250328_005041.png" width="250">
