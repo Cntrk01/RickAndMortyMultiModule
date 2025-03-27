@@ -38,6 +38,6 @@ I tried to make and implement Algebraic data type and monad definitions that I d
   <img src="assets/Screenshot_20250328_005041.png" width="200">
   <img src="assets/Screenshot_20250328_005058.png" width="200">
   <img src="assets/Screenshot_20250328_005108.png" width="200">
-  <img src="assets/Screenshot_20250328_005114.png" width="200">
-  <img src="assets/Screenshot_20250328_005126.png" width="200">
+  <img src="assets/Screenshot_20250328_005114.png" width="250">
+  <img src="assets/Screenshot_20250328_005126.png" width="250">
 </p>
